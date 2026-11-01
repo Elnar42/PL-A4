@@ -18,8 +18,17 @@ public class AverageColor {
         this.green = green;
         this.blue = blue;
     }
+    public static void apply(BufferedImage image, ImageRegion region) {
+        int rgb = extractAverageColour(image, region).getRgb();
 
-    public static AverageColor of(BufferedImage image, ImageRegion region) {
+        for (int y = region.y(); y < region.y() + region.height(); y++) {
+            for (int x = region.x(); x < region.x() + region.width(); x++) {
+                image.setRGB(x, y, rgb);
+            }
+        }
+    }
+
+    public static AverageColor extractAverageColour(BufferedImage image, ImageRegion region) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
@@ -54,6 +63,7 @@ public class AverageColor {
         );
     }
 
+
     public int getRed() {
         return red;
     }
@@ -67,7 +77,7 @@ public class AverageColor {
     }
 
     public int getRgb() {
-        return (red << 16) | (green << 8) | blue;
+        return new Color(red, green, blue).getRGB();
     }
 
     private static int channel(long sum, long count) {
