@@ -1,3 +1,5 @@
+package cli;
+
 public record Arguments(String fileName, int squareSize, Mode mode) {
 
     public static final String USAGE = """
@@ -11,7 +13,7 @@ public record Arguments(String fileName, int squareSize, Mode mode) {
     public Arguments {
         if (fileName == null || fileName.isBlank()) {
             throw new IllegalArgumentException(
-                    "File name is missing. \n" +  USAGE
+                    "File name is missing. \n" + USAGE
             );
         }
 
@@ -23,9 +25,10 @@ public record Arguments(String fileName, int squareSize, Mode mode) {
 
         if (mode == null) {
             throw new IllegalArgumentException(
-                    "Mode cannot be null. \n" +  USAGE
+                    "Mode cannot be null. \n" + USAGE
             );
         }
+
     }
 
     public static Arguments parse(String[] args) {

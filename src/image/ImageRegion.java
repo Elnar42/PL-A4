@@ -1,6 +1,7 @@
+package image;
+
 import java.util.ArrayList;
 import java.util.List;
-
 
 public record ImageRegion(int x, int y, int width, int height) {
 
@@ -12,6 +13,7 @@ public record ImageRegion(int x, int y, int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Region width and height must be positive.");
         }
+
     }
 
     public static List<ImageRegion> forImage(int imageWidth, int imageHeight, int squareSize) {

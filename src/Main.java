@@ -1,3 +1,7 @@
+import cli.Arguments;
+import cli.Mode;
+import image.ImageLoader;
+
 import java.awt.image.BufferedImage;
 
 public class Main {
