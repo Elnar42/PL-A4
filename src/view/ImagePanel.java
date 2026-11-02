@@ -17,11 +17,17 @@ class ImagePanel extends JPanel implements RegionListener {
     private final CountDownLatch painted;
     private boolean shown;
 
+    /**
+     * Stores the image that the panel draws.
+     */
     ImagePanel(BufferedImage image, CountDownLatch painted) {
         this.image = image;
         this.painted = painted;
     }
 
+    /**
+     * Paints the finished square on the window thread and repaints immediately.
+     */
     @Override
     public void onRegionFinished(ImageRegion region, AverageColor color) {
         UiThread.run(() -> {
@@ -33,6 +39,9 @@ class ImagePanel extends JPanel implements RegionListener {
         });
     }
 
+    /**
+     * Draws the image scaled to the panel and signals the first paint.
+     */
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);

@@ -11,10 +11,16 @@ public class MultiThreadProcessor extends ThreadProcessor {
 
     public static final MultiThreadProcessor INSTANCE = new MultiThreadProcessor();
 
+    /**
+     * Creates the multi-thread processor.
+     */
     private MultiThreadProcessor() {
         super("multi-processor");
     }
 
+    /**
+     * Averages horizontal bands at the same time, one band per worker.
+     */
     @Override
     protected void process(BufferedImage image, int squareSize, RegionListener listener) {
         if (image == null) {
@@ -55,6 +61,9 @@ public class MultiThreadProcessor extends ThreadProcessor {
         }
     }
 
+    /**
+     * Averages one band and records the first failure.
+     */
     private void runBand(
             BufferedImage image,
             int[] sourcePixels,

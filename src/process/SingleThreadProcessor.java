@@ -10,10 +10,16 @@ public class SingleThreadProcessor extends ThreadProcessor {
 
     public static final SingleThreadProcessor INSTANCE = new SingleThreadProcessor();
 
+    /**
+     * Creates the single-thread processor.
+     */
     private SingleThreadProcessor() {
         super("image-processor");
     }
 
+    /**
+     * Averages each square from left to right and top to bottom on this thread.
+     */
     @Override
     protected void process(BufferedImage image, int squareSize, RegionListener listener) {
         if (image == null) {

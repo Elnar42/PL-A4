@@ -1,78 +1,50 @@
 package cli;
 
-public record Arguments(String fileName, int squareSize, Mode mode) {
+public final class Arguments {
 
-    public static final String USAGE = """
-            Usage: java Main <file name> <square size> <mode>
-              file name    JPEG file to average
-              square size  side length of each square, in pixels
-              mode         S for single-threaded, M for multi-threaded
-            Example: java Main somefile.jpg 5 S
-            """;
+    private final String fileName;
+    private final int squareSize;
+    private final Mode mode;
 
-    public Arguments {
-        if (fileName == null || fileName.isBlank()) {
-            throw new IllegalArgumentException(
-                    "File name is missing. \n" + USAGE
-            );
+    /**
+     * Rejects a blank file name, a non-positive square size, or a missing mode.
+     */
+    public Arguments(String fileName, int squareSize, Mode mode) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throw new IllegalArgumentException("File name is missing.");
         }
 
         if (squareSize <= 0) {
-            throw new IllegalArgumentException(
-                    "Square size must be a positive integer. \n" + USAGE
-            );
+            throw new IllegalArgumentException("Square size must be a positive integer.");
         }
 
         if (mode == null) {
-            throw new IllegalArgumentException(
-                    "Mode cannot be null. \n" + USAGE
-            );
+            throw new IllegalArgumentException("Mode cannot be null.");
         }
 
+        this.fileName = fileName;
+        this.squareSize = squareSize;
+        this.mode = mode;
     }
 
-    public static Arguments parse(String[] args) {
-        if (args == null || args.length != 3) {
-            throw new IllegalArgumentException(USAGE);
-        }
-
-        return new Arguments(
-                args[0],
-                parseSquareSize(args[1]),
-                parseMode(args[2])
-        );
+    /**
+     * Returns the image file name.
+     */
+    public String fileName() {
+        return fileName;
     }
 
-    private static int parseSquareSize(String text) {
-        try {
-            int size = Integer.parseInt(text);
-
-            if (size > 0) {
-                return size;
-            }
-        } catch (NumberFormatException ignored) {
-        }
-
-        throw new IllegalArgumentException(
-                "Square size must be a positive integer. \n" + USAGE
-        );
+    /**
+     * Returns the side length of each square.
+     */
+    public int squareSize() {
+        return squareSize;
     }
 
-    private static Mode parseMode(String text) {
-        if (text != null && text.length() == 1) {
-            return switch (Character.toUpperCase(text.charAt(0))) {
-                case 'S' -> Mode.SINGLE;
-                case 'M' -> Mode.MULTI;
-                default -> rejectMode();
-            };
-        }
-
-        return rejectMode();
-    }
-
-    private static Mode rejectMode() {
-        throw new IllegalArgumentException(
-                "Mode must be S (single-threaded) or M (multi-threaded). \n" + USAGE
-        );
+    /**
+     * Returns the single-thread or multi-thread mode.
+     */
+    public Mode mode() {
+        return mode;
     }
 }

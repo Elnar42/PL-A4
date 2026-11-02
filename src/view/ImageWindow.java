@@ -22,6 +22,9 @@ public class ImageWindow {
     private final String summary;
     private final CloseRequest closeRequest;
 
+    /**
+     * Keeps the panel, status line, and close action for one window.
+     */
     private ImageWindow(ImagePanel panel, JLabel status, String summary, CloseRequest closeRequest) {
         this.panel = panel;
         this.status = status;
@@ -29,12 +32,15 @@ public class ImageWindow {
         this.closeRequest = closeRequest;
     }
 
+    /**
+     * Shows the original image and waits until the first paint finishes.
+     */
     public static ImageWindow show(BufferedImage image, String summary) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
 
-        if (summary == null || summary.isBlank()) {
+        if (summary == null || summary.trim().isEmpty()) {
             throw new IllegalArgumentException("Summary is missing.");
         }
 
@@ -52,18 +58,30 @@ public class ImageWindow {
         return window.get();
     }
 
+    /**
+     * Returns the listener that paints each finished square.
+     */
     public RegionListener listener() {
         return panel;
     }
 
+    /**
+     * Runs the given action when the window is closing.
+     */
     public void onClose(Runnable action) {
         closeRequest.setAction(action);
     }
 
+    /**
+     * Adds the save message to the status line.
+     */
     public void saved(String line) {
         UiThread.run(() -> status.setText(summary + "    " + line));
     }
 
+    /**
+     * Builds the frame, fits it to the screen, and shows it.
+     */
     private static ImageWindow open(BufferedImage image, String summary, CountDownLatch painted) {
         JFrame frame = new JFrame("PL-A4");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -92,6 +110,9 @@ public class ImageWindow {
         return new ImageWindow(panel, status, summary, closeRequest);
     }
 
+    /**
+     * Scales the image down to the available screen area, keeping its aspect ratio.
+     */
     private static Dimension fittedSize(int imageWidth, int imageHeight, int maxWidth, int maxHeight) {
         double scale = Math.min(1.0, Math.min(
                 maxWidth / (double) imageWidth,

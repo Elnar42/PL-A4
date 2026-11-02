@@ -5,9 +5,15 @@ import java.lang.reflect.InvocationTargetException;
 
 class UiThread {
 
+    /**
+     * Prevents instances of this utility class.
+     */
     private UiThread() {
     }
 
+    /**
+     * Runs the action on the Swing thread and waits until it finishes.
+     */
     static void run(Runnable action) {
         if (SwingUtilities.isEventDispatchThread()) {
             action.run();

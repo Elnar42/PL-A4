@@ -4,15 +4,49 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.function.IntBinaryOperator;
 
-public record AverageColor(int red, int green, int blue) {
+public final class AverageColor {
 
-    public AverageColor {
+    private final int red;
+    private final int green;
+    private final int blue;
+
+    /**
+     * Rejects a color channel outside 0 to 255.
+     */
+    public AverageColor(int red, int green, int blue) {
         if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255) {
             throw new IllegalArgumentException("Color channels must be between 0 and 255.");
         }
 
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
     }
 
+    /**
+     * Returns the red channel.
+     */
+    public int red() {
+        return red;
+    }
+
+    /**
+     * Returns the green channel.
+     */
+    public int green() {
+        return green;
+    }
+
+    /**
+     * Returns the blue channel.
+     */
+    public int blue() {
+        return blue;
+    }
+
+    /**
+     * Fills the region with this color.
+     */
     public void paint(BufferedImage image, ImageRegion region) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
@@ -31,6 +65,9 @@ public record AverageColor(int red, int green, int blue) {
         }
     }
 
+    /**
+     * Returns the average color of a region in the image.
+     */
     public static AverageColor extract(BufferedImage image, ImageRegion region) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
@@ -43,6 +80,9 @@ public record AverageColor(int red, int green, int blue) {
         return average(image.getWidth(), image.getHeight(), region, image::getRGB);
     }
 
+    /**
+     * Returns the average color of a region in a pixel buffer.
+     */
     public static AverageColor extract(int[] pixels, int imageWidth, int imageHeight, ImageRegion region) {
         if (pixels == null) {
             throw new IllegalArgumentException("Pixels are missing.");
@@ -55,6 +95,9 @@ public record AverageColor(int red, int green, int blue) {
         return average(imageWidth, imageHeight, region, (x, y) -> pixels[y * imageWidth + x]);
     }
 
+    /**
+     * Computes the per-channel mean of the pixels in a region.
+     */
     private static AverageColor average(
             int imageWidth,
             int imageHeight,
@@ -69,31 +112,37 @@ public record AverageColor(int red, int green, int blue) {
             throw new IllegalArgumentException("Region does not fit inside the image.");
         }
 
-        long red = 0;
-        long green = 0;
-        long blue = 0;
+        long redSum = 0;
+        long greenSum = 0;
+        long blueSum = 0;
         long count = (long) region.width() * region.height();
 
         for (int y = region.y(); y < region.y() + region.height(); y++) {
             for (int x = region.x(); x < region.x() + region.width(); x++) {
                 Color color = new Color(rgbAt.applyAsInt(x, y));
-                red += color.getRed();
-                green += color.getGreen();
-                blue += color.getBlue();
+                redSum += color.getRed();
+                greenSum += color.getGreen();
+                blueSum += color.getBlue();
             }
         }
 
         return new AverageColor(
-                channel(red, count),
-                channel(green, count),
-                channel(blue, count)
+                channel(redSum, count),
+                channel(greenSum, count),
+                channel(blueSum, count)
         );
     }
 
+    /**
+     * Returns this color as a packed RGB value.
+     */
     public int getRgb() {
         return new Color(red, green, blue).getRGB();
     }
 
+    /**
+     * Rounds a channel sum to the nearest whole number.
+     */
     private static int channel(long sum, long count) {
         return (int) ((sum + count / 2) / count);
     }

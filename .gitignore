@@ -34,3 +34,4 @@ bin/
 result.jpg
 sources.txt
 .check/
+.jdk/

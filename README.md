@@ -1,49 +1,56 @@
 # PL-A4
 
-This program opens a JPEG, replaces every square of pixels with the average color of that square, and shows the image changing as each square is finished.
+This program opens an image, replaces every square of pixels with the average color of that square, and shows the image changing as each square is finished.
 
 ## Setup
 
-Install JDK 17 or newer. `java` and `javac` must be available on `PATH`.
+Install any JDK from Java 8 upward, including Java 17 and newer. `java` and `javac` must be on `PATH`. The compiled program uses only Java 8 language and libraries, so the same class files run on Java 8, Java 17, and later versions. The commands are the same on Windows and macOS.
 
-On Windows, install a JDK from [Adoptium](https://adoptium.net/) or Oracle, then add its `bin` folder to `PATH`. From the project directory:
+From the project directory, with JDK 9 or newer:
 
-```text
-run.bat image.jpg 20 S
-```
-
-On macOS, install a JDK 17 or newer (for example with `brew install openjdk@17`) and make sure its `bin` folder is on `PATH`. From the project directory:
+Windows:
 
 ```text
-chmod +x run.sh
-./run.sh image.jpg 20 M
+javac --release 8 -d out src\Main.java src\cli\*.java src\image\*.java src\process\*.java src\view\*.java src\Launch.java
+java -cp out Main image.jpg 20 S
 ```
 
-Each script compiles every source file under `src` with `javac --release 17` into `out`, then starts `Main`. The script moves to the project directory first, so `result.jpg` is written there. Give the JPEG as a path that is valid from that directory. Close the window to leave the program. A missing file, a file that is not a JPEG, or bad arguments prints the error and the script exits with status 1.
+macOS:
+
+```text
+javac --release 8 -d out src/Main.java src/cli/*.java src/image/*.java src/process/*.java src/view/*.java src/Launch.java
+java -cp out Main image.jpg 20 M
+```
+
+JDK 8 does not support `--release`. Use `-source 8 -target 8` instead of `--release 8` in the `javac` command above. If no Java is installed at all, install any JDK 8 or newer first.
 
 ## Arguments
 
 The program takes three arguments:
 
 ```text
-<file name> <square size> <mode>
+java Main <image> <square size> <S|M>
 ```
 
-- **File name.** A JPEG file. There is no limit on its width or height.
+- **File name.** Any image file, such as JPEG, PNG, GIF, or BMP. There is no limit on its width or height. It can be your own image, or one of the files currently in `img/`.
 - **Square size.** The side length, in pixels, of each square that is averaged. It must be a positive whole number.
 - **Mode.** `S` processes the image on one thread, from left to right and from top to bottom. `M` does the same walk in parallel horizontal bands. The number of bands is the number of CPU cores, and it is never larger than the number of square rows.
 
 Example:
 
 ```text
-run.bat image.jpg 5 S
+java -cp out Main image.jpg 5 S
 ```
+
+A missing argument, a square size that is not a positive whole number, or a mode other than `S` or `M` prints the error and asks for that value again. `Y` is not a mode, so the program asks for `S` or `M`. A missing file or a file that is not an image prints the error and asks for the file again. The square size and mode already given are kept.
+
+When the file name is left out, the program lists whatever files are currently in `img/` and also accepts the path of your own image.
 
 With a square size of 20, each 20 by 20 block becomes one flat color. A block on the right or bottom edge is smaller when the image size is not a multiple of the square size, and that smaller block is averaged only over the pixels that exist.
 
 ## Output
 
-When processing finishes, or when the window is closed, the program writes the averaged image to `result.jpg` in the project directory. That file has the original width and height. Closing the window finishes the square already in progress, then saves the image as it is.
+When processing finishes, or when the window is closed, the program writes the averaged image to `result.jpg` in the working directory. That file has the original width and height. Closing the window finishes the square already in progress, then saves the image as it is.
 
 ## Display
 
@@ -51,4 +58,4 @@ The window shows the photograph first, then updates it square by square. It uses
 
 ## Check
 
-Both modes were run on a 25 by 17 JPEG with square size 10. That leaves a 5-pixel column on the right and a 7-pixel row on the bottom. Single-thread and multi-thread produced the same pixels, including those partial squares, and both matched the average of each square in the loaded image. The two saved `result.jpg` files matched as well. A missing file was rejected before a window opened.
+Both modes were run on `img/edge.jpg`, a 25 by 17 JPEG, with square size 10. That leaves a 5-pixel column on the right and a 7-pixel row on the bottom. Single-thread and multi-thread produced the same pixels, including those partial squares, and both matched the average of each square in the loaded image. The menu was also given a square size of 0, the mode `Y`, and a missing file. Each of those answers was asked again, and the program stayed open.

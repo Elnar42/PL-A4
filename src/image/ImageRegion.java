@@ -1,11 +1,20 @@
 package image;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public record ImageRegion(int x, int y, int width, int height) {
+public final class ImageRegion {
 
-    public ImageRegion {
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
+
+    /**
+     * Rejects a negative origin or a non-positive width or height.
+     */
+    public ImageRegion(int x, int y, int width, int height) {
         if (x < 0 || y < 0) {
             throw new IllegalArgumentException("Region origin cannot be negative.");
         }
@@ -14,8 +23,43 @@ public record ImageRegion(int x, int y, int width, int height) {
             throw new IllegalArgumentException("Region width and height must be positive.");
         }
 
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
+    /**
+     * Returns the left edge of the region.
+     */
+    public int x() {
+        return x;
+    }
+
+    /**
+     * Returns the top edge of the region.
+     */
+    public int y() {
+        return y;
+    }
+
+    /**
+     * Returns the width of the region in pixels.
+     */
+    public int width() {
+        return width;
+    }
+
+    /**
+     * Returns the height of the region in pixels.
+     */
+    public int height() {
+        return height;
+    }
+
+    /**
+     * Splits the image into left-to-right, top-to-bottom squares, including smaller squares on the edges.
+     */
     public static List<ImageRegion> forImage(int imageWidth, int imageHeight, int squareSize) {
         if (imageWidth <= 0 || imageHeight <= 0) {
             throw new IllegalArgumentException("Image width and height must be positive.");
@@ -25,7 +69,7 @@ public record ImageRegion(int x, int y, int width, int height) {
             throw new IllegalArgumentException("Square size must be a positive integer.");
         }
 
-        List<ImageRegion> regions = new ArrayList<>();
+        List<ImageRegion> regions = new ArrayList<ImageRegion>();
 
         for (int y = 0; y < imageHeight; ) {
             int height = Math.min(squareSize, imageHeight - y);
@@ -39,6 +83,6 @@ public record ImageRegion(int x, int y, int width, int height) {
             y += height;
         }
 
-        return List.copyOf(regions);
+        return Collections.unmodifiableList(regions);
     }
 }

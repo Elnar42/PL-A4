@@ -10,6 +10,9 @@ public class ResultWriter {
 
     public static final String FILE_NAME = "result.jpg";
 
+    /**
+     * Writes the image to result.jpg in the working directory.
+     */
     public static void write(BufferedImage image) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
@@ -24,6 +27,9 @@ public class ResultWriter {
         }
     }
 
+    /**
+     * Copies the image to an RGB picture that a JPEG writer can save.
+     */
     private static BufferedImage asJpeg(BufferedImage image) {
         if (image.getType() == BufferedImage.TYPE_INT_RGB) {
             return image;
