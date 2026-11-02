@@ -16,13 +16,13 @@ public class Main {
             BufferedImage image = ImageLoader.load(arguments.fileName());
             RegionListener listener = ImageWindow.show(image);
 
-            SingleThreadProcessor.INSTANCE.process(image, arguments.squareSize(), listener);
+            SingleThreadProcessor.INSTANCE.run(image, arguments.squareSize(), listener);
             ResultWriter.write(image);
 
             System.out.println("Saved " + ResultWriter.FILE_NAME);
 
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
+        } catch (Exception exception) {
+            System.err.println(exception.getMessage());
         }
     }
 }

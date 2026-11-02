@@ -11,10 +11,11 @@ public class SingleThreadProcessor extends ThreadProcessor {
     public static final SingleThreadProcessor INSTANCE = new SingleThreadProcessor();
 
     private SingleThreadProcessor() {
+        super("image-processor");
     }
 
     @Override
-    public void process(BufferedImage image, int squareSize, RegionListener listener) {
+    protected void process(BufferedImage image, int squareSize, RegionListener listener) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
