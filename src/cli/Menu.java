@@ -1,5 +1,6 @@
 package cli;
 
+import exceptions.InvalidModeException;
 import image.ImageLoader;
 import image.ResultWriter;
 import process.ThreadProcessor;
@@ -50,7 +51,7 @@ public final class Menu {
         if (args.length > 2) {
             try {
                 mode = Mode.parse(args[2]);
-            } catch (IllegalArgumentException exception) {
+            } catch (InvalidModeException exception) {
                 System.out.println(exception.getMessage());
             }
         }
@@ -192,7 +193,7 @@ public final class Menu {
             String answer = prompt("Mode, S for one thread or M for many: ");
             try {
                 return Mode.parse(answer);
-            } catch (IllegalArgumentException exception) {
+            } catch (InvalidModeException exception) {
                 System.out.println(exception.getMessage());
             }
         }

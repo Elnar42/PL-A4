@@ -1,5 +1,7 @@
 package window;
 
+import exceptions.WindowException;
+
 import javax.swing.SwingUtilities;
 import java.lang.reflect.InvocationTargetException;
 
@@ -24,9 +26,9 @@ public final class UiThread {
             SwingUtilities.invokeAndWait(action);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Could not update the window.");
+            throw new WindowException("Could not update the window.");
         } catch (InvocationTargetException exception) {
-            throw new IllegalStateException("Could not update the window.");
+            throw new WindowException("Could not update the window.");
         }
     }
 }

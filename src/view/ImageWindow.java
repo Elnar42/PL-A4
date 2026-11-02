@@ -1,5 +1,8 @@
 package view;
 
+import exceptions.MissingImageException;
+import exceptions.MissingSummaryException;
+import exceptions.WindowException;
 import image.RegionListener;
 import window.CloseRequest;
 import window.UiThread;
@@ -39,11 +42,11 @@ public class ImageWindow {
      */
     public static ImageWindow show(BufferedImage image, String summary) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         if (summary == null || summary.trim().isEmpty()) {
-            throw new IllegalArgumentException("Summary is missing.");
+            throw new MissingSummaryException();
         }
 
         CountDownLatch painted = new CountDownLatch(1);
@@ -54,7 +57,7 @@ public class ImageWindow {
             painted.await();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Could not show the image.");
+            throw new WindowException("Could not show the image.");
         }
 
         return window.get();

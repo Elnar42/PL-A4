@@ -1,5 +1,7 @@
 package band;
 
+import exceptions.MissingImageException;
+import exceptions.MissingPixelsException;
 import image.AverageColor;
 import image.ImageRegion;
 import image.RegionListener;
@@ -10,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-
+/**
+ * This band represents the row of the image that each processor takes in multithreading
+ */
 public final class RowBand {
 
     private final List<ImageRegion> regions;
@@ -19,7 +23,7 @@ public final class RowBand {
      * Stores the squares that belong to one band.
      */
     private RowBand(List<ImageRegion> regions) {
-        this.regions = Collections.unmodifiableList(new ArrayList<ImageRegion>(regions));
+        this.regions = Collections.unmodifiableList(new ArrayList<>(regions));
     }
 
     /**
@@ -27,11 +31,11 @@ public final class RowBand {
      */
     public void process(BufferedImage image, int[] sourcePixels, RegionListener listener, BooleanSupplier stopped) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         if (sourcePixels == null) {
-            throw new IllegalArgumentException("Pixels are missing.");
+            throw new MissingPixelsException();
         }
 
         for (ImageRegion region : regions) {
@@ -96,21 +100,21 @@ public final class RowBand {
      * Groups squares that share the same top edge into rows.
      */
     private static List<List<ImageRegion>> rowsOf(List<ImageRegion> regions) {
-        List<List<ImageRegion>> rows = new ArrayList<List<ImageRegion>>();
+        List<List<ImageRegion>> rows = new ArrayList<>();
         List<ImageRegion> row = new ArrayList<ImageRegion>();
         int y = regions.get(0).y();
 
         for (ImageRegion region : regions) {
             if (region.y() != y) {
-                rows.add(Collections.unmodifiableList(new ArrayList<ImageRegion>(row)));
-                row = new ArrayList<ImageRegion>();
+                rows.add(Collections.unmodifiableList(new ArrayList<>(row)));
+                row = new ArrayList<>();
                 y = region.y();
             }
 
             row.add(region);
         }
 
-        rows.add(Collections.unmodifiableList(new ArrayList<ImageRegion>(row)));
+        rows.add(Collections.unmodifiableList(new ArrayList<>(row)));
         return rows;
     }
 }

@@ -1,6 +1,8 @@
 package process;
 
 import band.RowBand;
+import exceptions.MissingImageException;
+import exceptions.ProcessingInterruptedException;
 import image.RegionListener;
 
 import java.awt.image.BufferedImage;
@@ -25,7 +27,7 @@ public class MultiThreadProcessor extends ThreadProcessor {
     @Override
     protected void process(BufferedImage image, int squareSize, RegionListener listener) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         int width = image.getWidth();
@@ -54,7 +56,7 @@ public class MultiThreadProcessor extends ThreadProcessor {
         } catch (InterruptedException exception) {
             stop();
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Image processing was interrupted.");
+            throw new ProcessingInterruptedException();
         }
 
         if (failure.get() != null) {

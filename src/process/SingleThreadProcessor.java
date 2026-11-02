@@ -1,5 +1,6 @@
 package process;
 
+import exceptions.MissingImageException;
 import image.AverageColor;
 import image.ImageRegion;
 import image.RegionListener;
@@ -23,7 +24,7 @@ public class SingleThreadProcessor extends ThreadProcessor {
     @Override
     protected void process(BufferedImage image, int squareSize, RegionListener listener) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         for (ImageRegion region : ImageRegion.forImage(

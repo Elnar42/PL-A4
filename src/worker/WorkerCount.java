@@ -1,5 +1,8 @@
 package worker;
 
+import exceptions.InvalidImageSizeException;
+import exceptions.InvalidSquareSizeException;
+
 public final class WorkerCount {
 
     /**
@@ -20,11 +23,11 @@ public final class WorkerCount {
      */
     public static int forImage(int imageHeight, int squareSize) {
         if (imageHeight <= 0) {
-            throw new IllegalArgumentException("Image height must be positive.");
+            throw new InvalidImageSizeException("Image height must be positive.");
         }
 
         if (squareSize <= 0) {
-            throw new IllegalArgumentException("Square size must be a positive integer.");
+            throw new InvalidSquareSizeException();
         }
 
         int rows = (int) Math.ceil(imageHeight / (double) squareSize);

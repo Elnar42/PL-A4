@@ -1,5 +1,9 @@
 package cli;
 
+import exceptions.InvalidSquareSizeException;
+import exceptions.MissingFileNameException;
+import exceptions.MissingModeException;
+
 public final class Arguments {
 
     private final String fileName;
@@ -11,15 +15,15 @@ public final class Arguments {
      */
     public Arguments(String fileName, int squareSize, Mode mode) {
         if (fileName == null || fileName.trim().isEmpty()) {
-            throw new IllegalArgumentException("File name is missing.");
+            throw new MissingFileNameException();
         }
 
         if (squareSize <= 0) {
-            throw new IllegalArgumentException("Square size must be a positive integer.");
+            throw new InvalidSquareSizeException();
         }
 
         if (mode == null) {
-            throw new IllegalArgumentException("Mode cannot be null.");
+            throw new MissingModeException();
         }
 
         this.fileName = fileName;

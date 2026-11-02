@@ -1,5 +1,12 @@
 package image;
 
+import exceptions.InvalidColorException;
+import exceptions.InvalidPixelBufferException;
+import exceptions.InvalidRegionException;
+import exceptions.MissingImageException;
+import exceptions.MissingPixelsException;
+import exceptions.MissingRegionException;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.function.IntBinaryOperator;
@@ -15,7 +22,7 @@ public final class AverageColor {
      */
     public AverageColor(int red, int green, int blue) {
         if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255) {
-            throw new IllegalArgumentException("Color channels must be between 0 and 255.");
+            throw new InvalidColorException();
         }
 
         this.red = red;
@@ -49,11 +56,11 @@ public final class AverageColor {
      */
     public void paint(BufferedImage image, ImageRegion region) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         if (region == null) {
-            throw new IllegalArgumentException("Region is missing.");
+            throw new MissingRegionException();
         }
 
         int rgb = getRgb();
@@ -70,11 +77,11 @@ public final class AverageColor {
      */
     public static AverageColor extract(BufferedImage image, ImageRegion region) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         if (region == null) {
-            throw new IllegalArgumentException("Region is missing.");
+            throw new MissingRegionException();
         }
 
         return average(image.getWidth(), image.getHeight(), region, image::getRGB);
@@ -85,11 +92,11 @@ public final class AverageColor {
      */
     public static AverageColor extract(int[] pixels, int imageWidth, int imageHeight, ImageRegion region) {
         if (pixels == null) {
-            throw new IllegalArgumentException("Pixels are missing.");
+            throw new MissingPixelsException();
         }
 
         if (imageWidth <= 0 || imageHeight <= 0 || pixels.length < (long) imageWidth * imageHeight) {
-            throw new IllegalArgumentException("Pixel buffer does not match the image.");
+            throw new InvalidPixelBufferException();
         }
 
         return average(imageWidth, imageHeight, region, (x, y) -> pixels[y * imageWidth + x]);
@@ -105,11 +112,11 @@ public final class AverageColor {
             IntBinaryOperator rgbAt
     ) {
         if (region == null) {
-            throw new IllegalArgumentException("Region is missing.");
+            throw new MissingRegionException();
         }
 
         if (region.x() + region.width() > imageWidth || region.y() + region.height() > imageHeight) {
-            throw new IllegalArgumentException("Region does not fit inside the image.");
+            throw new InvalidRegionException("Region does not fit inside the image.");
         }
 
         long redSum = 0;

@@ -1,5 +1,9 @@
 package image;
 
+import exceptions.InvalidImageSizeException;
+import exceptions.InvalidRegionException;
+import exceptions.InvalidSquareSizeException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,11 +20,11 @@ public final class ImageRegion {
      */
     public ImageRegion(int x, int y, int width, int height) {
         if (x < 0 || y < 0) {
-            throw new IllegalArgumentException("Region origin cannot be negative.");
+            throw new InvalidRegionException("Region origin cannot be negative.");
         }
 
         if (width <= 0 || height <= 0) {
-            throw new IllegalArgumentException("Region width and height must be positive.");
+            throw new InvalidRegionException("Region width and height must be positive.");
         }
 
         this.x = x;
@@ -62,11 +66,11 @@ public final class ImageRegion {
      */
     public static List<ImageRegion> forImage(int imageWidth, int imageHeight, int squareSize) {
         if (imageWidth <= 0 || imageHeight <= 0) {
-            throw new IllegalArgumentException("Image width and height must be positive.");
+            throw new InvalidImageSizeException("Image width and height must be positive.");
         }
 
         if (squareSize <= 0) {
-            throw new IllegalArgumentException("Square size must be a positive integer.");
+            throw new InvalidSquareSizeException();
         }
 
         List<ImageRegion> regions = new ArrayList<ImageRegion>();

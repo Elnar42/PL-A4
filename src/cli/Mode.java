@@ -1,5 +1,6 @@
 package cli;
 
+import exceptions.InvalidModeException;
 import process.MultiThreadProcessor;
 import process.SingleThreadProcessor;
 import process.ThreadProcessor;
@@ -34,7 +35,7 @@ public enum Mode {
             }
         }
 
-        throw new IllegalArgumentException("Enter S or M.");
+        throw new InvalidModeException();
     }
 
     /**

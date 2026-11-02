@@ -1,5 +1,8 @@
 package image;
 
+import exceptions.ImageWriteException;
+import exceptions.MissingImageException;
+
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -15,15 +18,15 @@ public class ResultWriter {
      */
     public static void write(BufferedImage image) {
         if (image == null) {
-            throw new IllegalArgumentException("Image is missing.");
+            throw new MissingImageException();
         }
 
         try {
             if (!ImageIO.write(asJpeg(image), "jpg", new File(FILE_NAME))) {
-                throw new IllegalArgumentException("Cannot write image: " + FILE_NAME);
+                throw new ImageWriteException(FILE_NAME);
             }
         } catch (IOException exception) {
-            throw new IllegalArgumentException("Cannot write image: " + FILE_NAME);
+            throw new ImageWriteException(FILE_NAME);
         }
     }
 

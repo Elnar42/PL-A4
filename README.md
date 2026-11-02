@@ -11,14 +11,14 @@ From the project directory, with JDK 9 or newer:
 Windows:
 
 ```text
-javac --release 8 -d out src\Main.java src\Launch.java src\band\*.java src\cli\*.java src\image\*.java src\process\*.java src\view\*.java src\window\*.java src\worker\*.java
+javac --release 8 -d out src\Main.java src\Launch.java src\band\*.java src\cli\*.java src\exceptions\*.java src\image\*.java src\process\*.java src\view\*.java src\window\*.java src\worker\*.java
 java -cp out Main image.jpg 20 S
 ```
 
 macOS:
 
 ```text
-javac --release 8 -d out src/Main.java src/Launch.java src/band/*.java src/cli/*.java src/image/*.java src/process/*.java src/view/*.java src/window/*.java src/worker/*.java
+javac --release 8 -d out src/Main.java src/Launch.java src/band/*.java src/cli/*.java src/exceptions/*.java src/image/*.java src/process/*.java src/view/*.java src/window/*.java src/worker/*.java
 java -cp out Main image.jpg 20 M
 ```
 

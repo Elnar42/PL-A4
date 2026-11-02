@@ -1,5 +1,10 @@
 package image;
 
+import exceptions.ImageFileNotFoundException;
+import exceptions.ImageReadException;
+import exceptions.NotAFileException;
+import exceptions.NotAnImageException;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,21 +19,21 @@ public class ImageLoader {
         File file = new File(fileName);
 
         if (!file.exists()) {
-            throw new IllegalArgumentException("File not found: " + fileName);
+            throw new ImageFileNotFoundException(fileName);
         }
 
         if (!file.isFile()) {
-            throw new IllegalArgumentException("Not a file: " + fileName);
+            throw new NotAFileException(fileName);
         }
 
         try {
             BufferedImage image = ImageIO.read(file);
             if (image == null) {
-                throw new IllegalArgumentException("Not an image: " + fileName);
+                throw new NotAnImageException(fileName);
             }
             return image;
         } catch (IOException exception) {
-            throw new IllegalArgumentException("Cannot read image: " + fileName);
+            throw new ImageReadException(fileName);
         }
     }
 }
