@@ -11,6 +11,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
@@ -24,15 +25,25 @@ public class ImageWindow {
 
     private final ImagePanel panel;
     private final JLabel status;
+    private final JLabel timerLabel;
     private final String summary;
     private final CloseRequest closeRequest;
+    private Timer timer;
+    private long startedAt;
 
     /**
-     * Keeps the panel, status line, and close action for one window.
+     * Keeps the panel, status line, timer, and close action for one window.
      */
-    private ImageWindow(ImagePanel panel, JLabel status, String summary, CloseRequest closeRequest) {
+    private ImageWindow(
+            ImagePanel panel,
+            JLabel status,
+            JLabel timerLabel,
+            String summary,
+            CloseRequest closeRequest
+    ) {
         this.panel = panel;
         this.status = status;
+        this.timerLabel = timerLabel;
         this.summary = summary;
         this.closeRequest = closeRequest;
     }
@@ -85,6 +96,45 @@ public class ImageWindow {
     }
 
     /**
+     * Starts the elapsed-time label under the image.
+     */
+    public void startTimer() {
+        UiThread.run(() -> {
+            startedAt = System.currentTimeMillis();
+            timerLabel.setText(formatElapsed(0));
+            if (timer != null) {
+                timer.stop();
+            }
+            timer = new Timer(1000, event -> timerLabel.setText(formatElapsed(System.currentTimeMillis() - startedAt)));
+            timer.setRepeats(true);
+            timer.start();
+        });
+    }
+
+    /**
+     * Stops the elapsed-time label and leaves the final time on screen.
+     */
+    public void stopTimer() {
+        UiThread.run(() -> {
+            if (timer != null) {
+                timer.stop();
+            }
+            if (startedAt > 0) {
+                timerLabel.setText(formatElapsed(System.currentTimeMillis() - startedAt));
+            }
+        });
+    }
+
+    /**
+     * Formats an elapsed duration as minutes and seconds.
+     */
+    private static String formatElapsed(long millis) {
+        long minutes = millis / 60000;
+        long seconds = (millis % 60000) / 1000;
+        return String.format("Time: %02d:%02d", minutes, seconds);
+    }
+
+    /**
      * Builds the frame, fits it to the screen, and shows it.
      */
     private static ImageWindow open(BufferedImage image, String summary, CountDownLatch painted) {
@@ -94,25 +144,32 @@ public class ImageWindow {
         frame.addWindowListener(closeRequest);
 
         ImagePanel panel = new ImagePanel(image, painted);
+        JLabel timerLabel = new JLabel(formatElapsed(0));
+        timerLabel.setBorder(BorderFactory.createEmptyBorder(4, 8, 0, 8));
         JLabel status = new JLabel(summary);
-        status.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        status.setBorder(BorderFactory.createEmptyBorder(0, 8, 4, 8));
+
+        JPanel bottom = new JPanel(new BorderLayout());
+        bottom.add(timerLabel, BorderLayout.PAGE_START);
+        bottom.add(status, BorderLayout.PAGE_END);
 
         JPanel content = new JPanel(new BorderLayout());
         content.add(panel, BorderLayout.CENTER);
-        content.add(status, BorderLayout.PAGE_END);
+        content.add(bottom, BorderLayout.PAGE_END);
         frame.setContentPane(content);
         frame.pack();
 
         Insets insets = frame.getInsets();
         Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         int maxWidth = Math.max(1, screen.width - insets.left - insets.right);
-        int maxHeight = Math.max(1, screen.height - insets.top - insets.bottom - status.getHeight());
+        int bottomHeight = timerLabel.getPreferredSize().height + status.getPreferredSize().height;
+        int maxHeight = Math.max(1, screen.height - insets.top - insets.bottom - bottomHeight);
         panel.setPreferredSize(fittedSize(image.getWidth(), image.getHeight(), maxWidth, maxHeight));
 
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        return new ImageWindow(panel, status, summary, closeRequest);
+        return new ImageWindow(panel, status, timerLabel, summary, closeRequest);
     }
 
     /**

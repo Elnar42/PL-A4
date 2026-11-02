@@ -218,7 +218,12 @@ public final class Menu {
             ImageWindow window = ImageWindow.show(image, summary);
             ThreadProcessor processor = arguments.mode().processor();
             window.onClose(processor::stop);
-            processor.run(image, arguments.squareSize(), window.listener());
+            window.startTimer();
+            try {
+                processor.run(image, arguments.squareSize(), window.listener());
+            } finally {
+                window.stopTimer();
+            }
             ResultWriter.write(image);
             window.saved("Saved " + ResultWriter.FILE_NAME);
             System.out.println("Saved " + ResultWriter.FILE_NAME);
