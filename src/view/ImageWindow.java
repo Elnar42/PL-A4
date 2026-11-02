@@ -2,7 +2,11 @@ package view;
 
 import image.RegionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
@@ -13,14 +17,28 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ImageWindow {
 
-    public static RegionListener show(BufferedImage image) {
+    private final ImagePanel panel;
+    private final JLabel status;
+    private final String summary;
+
+    private ImageWindow(ImagePanel panel, JLabel status, String summary) {
+        this.panel = panel;
+        this.status = status;
+        this.summary = summary;
+    }
+
+    public static ImageWindow show(BufferedImage image, String summary) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
 
+        if (summary == null || summary.isBlank()) {
+            throw new IllegalArgumentException("Summary is missing.");
+        }
+
         CountDownLatch painted = new CountDownLatch(1);
-        AtomicReference<ImagePanel> panel = new AtomicReference<>();
-        UiThread.run(() -> panel.set(open(image, painted)));
+        AtomicReference<ImageWindow> window = new AtomicReference<>();
+        UiThread.run(() -> window.set(open(image, summary, painted)));
 
         try {
             painted.await();
@@ -29,26 +47,41 @@ public class ImageWindow {
             throw new IllegalStateException("Could not show the image.");
         }
 
-        return panel.get();
+        return window.get();
     }
 
-    private static ImagePanel open(BufferedImage image, CountDownLatch painted) {
+    public RegionListener listener() {
+        return panel;
+    }
+
+    public void saved(String line) {
+        UiThread.run(() -> status.setText(summary + "    " + line));
+    }
+
+    private static ImageWindow open(BufferedImage image, String summary, CountDownLatch painted) {
         JFrame frame = new JFrame("PL-A4");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         ImagePanel panel = new ImagePanel(image, painted);
-        frame.setContentPane(panel);
+        JLabel status = new JLabel(summary);
+        status.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+
+        JPanel content = new JPanel(new BorderLayout());
+        content.add(panel, BorderLayout.CENTER);
+        content.add(status, BorderLayout.PAGE_END);
+        frame.setContentPane(content);
         frame.pack();
 
         Insets insets = frame.getInsets();
         Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         int maxWidth = Math.max(1, screen.width - insets.left - insets.right);
-        int maxHeight = Math.max(1, screen.height - insets.top - insets.bottom);
+        int maxHeight = Math.max(1, screen.height - insets.top - insets.bottom - status.getHeight());
         panel.setPreferredSize(fittedSize(image.getWidth(), image.getHeight(), maxWidth, maxHeight));
 
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        return panel;
+        return new ImageWindow(panel, status, summary);
     }
 
     private static Dimension fittedSize(int imageWidth, int imageHeight, int maxWidth, int maxHeight) {
