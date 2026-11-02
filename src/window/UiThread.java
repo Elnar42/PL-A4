@@ -1,9 +1,9 @@
-package view;
+package window;
 
 import javax.swing.SwingUtilities;
 import java.lang.reflect.InvocationTargetException;
 
-class UiThread {
+public final class UiThread {
 
     /**
      * Prevents instances of this utility class.
@@ -14,7 +14,7 @@ class UiThread {
     /**
      * Runs the action on the Swing thread and waits until it finishes.
      */
-    static void run(Runnable action) {
+    public static void run(Runnable action) {
         if (SwingUtilities.isEventDispatchThread()) {
             action.run();
             return;

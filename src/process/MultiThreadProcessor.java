@@ -1,5 +1,6 @@
 package process;
 
+import band.RowBand;
 import image.RegionListener;
 
 import java.awt.image.BufferedImage;

@@ -1,8 +1,9 @@
-package process;
+package band;
 
 import image.AverageColor;
 import image.ImageRegion;
 import image.RegionListener;
+import worker.WorkerCount;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public final class RowBand {
     /**
      * Averages each square in this band until a stop is requested.
      */
-    void process(BufferedImage image, int[] sourcePixels, RegionListener listener, BooleanSupplier stopped) {
+    public void process(BufferedImage image, int[] sourcePixels, RegionListener listener, BooleanSupplier stopped) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
@@ -73,12 +74,12 @@ public final class RowBand {
         int base = rows.size() / workers;
         int extra = rows.size() % workers;
 
-        List<RowBand> bands = new ArrayList<>();
+        List<RowBand> bands = new ArrayList<RowBand>();
         int index = 0;
 
         for (int worker = 0; worker < workers; worker++) {
             int rowCount = base + (worker < extra ? 1 : 0);
-            List<ImageRegion> band = new ArrayList<>();
+            List<ImageRegion> band = new ArrayList<ImageRegion>();
 
             for (int row = 0; row < rowCount; row++) {
                 band.addAll(rows.get(index));
@@ -95,14 +96,14 @@ public final class RowBand {
      * Groups squares that share the same top edge into rows.
      */
     private static List<List<ImageRegion>> rowsOf(List<ImageRegion> regions) {
-        List<List<ImageRegion>> rows = new ArrayList<>();
-        List<ImageRegion> row = new ArrayList<>();
+        List<List<ImageRegion>> rows = new ArrayList<List<ImageRegion>>();
+        List<ImageRegion> row = new ArrayList<ImageRegion>();
         int y = regions.get(0).y();
 
         for (ImageRegion region : regions) {
             if (region.y() != y) {
                 rows.add(Collections.unmodifiableList(new ArrayList<ImageRegion>(row)));
-                row = new ArrayList<>();
+                row = new ArrayList<ImageRegion>();
                 y = region.y();
             }
 

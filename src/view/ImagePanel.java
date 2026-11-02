@@ -3,6 +3,7 @@ package view;
 import image.AverageColor;
 import image.ImageRegion;
 import image.RegionListener;
+import window.UiThread;
 
 import javax.swing.JPanel;
 import java.awt.Graphics;

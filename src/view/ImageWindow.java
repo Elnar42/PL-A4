@@ -1,6 +1,8 @@
 package view;
 
 import image.RegionListener;
+import window.CloseRequest;
+import window.UiThread;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;

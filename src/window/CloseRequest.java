@@ -1,9 +1,9 @@
-package view;
+package window;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-class CloseRequest extends WindowAdapter {
+public class CloseRequest extends WindowAdapter {
 
     private volatile Runnable action = () -> {
     };
@@ -11,7 +11,7 @@ class CloseRequest extends WindowAdapter {
     /**
      * Sets the action that runs when the window is closing.
      */
-    void setAction(Runnable action) {
+    public void setAction(Runnable action) {
         this.action = action == null ? () -> {
         } : action;
     }
