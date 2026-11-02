@@ -2,34 +2,18 @@ package image;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.function.IntBinaryOperator;
 
-public class AverageColor {
+public record AverageColor(int red, int green, int blue) {
 
-    private final int red;
-    private final int green;
-    private final int blue;
-
-    public AverageColor(int red, int green, int blue) {
+    public AverageColor {
         if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255) {
             throw new IllegalArgumentException("Color channels must be between 0 and 255.");
         }
 
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
     }
 
-    public static void apply(BufferedImage image, ImageRegion region) {
-        int rgb = extractAverageColour(image, region).getRgb();
-
-        for (int y = region.y(); y < region.y() + region.height(); y++) {
-            for (int x = region.x(); x < region.x() + region.width(); x++) {
-                image.setRGB(x, y, rgb);
-            }
-        }
-    }
-
-    public static AverageColor extractAverageColour(BufferedImage image, ImageRegion region) {
+    public void paint(BufferedImage image, ImageRegion region) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
@@ -38,8 +22,50 @@ public class AverageColor {
             throw new IllegalArgumentException("Region is missing.");
         }
 
-        if (region.x() + region.width() > image.getWidth()
-                || region.y() + region.height() > image.getHeight()) {
+        int rgb = getRgb();
+
+        for (int y = region.y(); y < region.y() + region.height(); y++) {
+            for (int x = region.x(); x < region.x() + region.width(); x++) {
+                image.setRGB(x, y, rgb);
+            }
+        }
+    }
+
+    public static AverageColor extract(BufferedImage image, ImageRegion region) {
+        if (image == null) {
+            throw new IllegalArgumentException("Image is missing.");
+        }
+
+        if (region == null) {
+            throw new IllegalArgumentException("Region is missing.");
+        }
+
+        return average(image.getWidth(), image.getHeight(), region, image::getRGB);
+    }
+
+    public static AverageColor extract(int[] pixels, int imageWidth, int imageHeight, ImageRegion region) {
+        if (pixels == null) {
+            throw new IllegalArgumentException("Pixels are missing.");
+        }
+
+        if (imageWidth <= 0 || imageHeight <= 0 || pixels.length < (long) imageWidth * imageHeight) {
+            throw new IllegalArgumentException("Pixel buffer does not match the image.");
+        }
+
+        return average(imageWidth, imageHeight, region, (x, y) -> pixels[y * imageWidth + x]);
+    }
+
+    private static AverageColor average(
+            int imageWidth,
+            int imageHeight,
+            ImageRegion region,
+            IntBinaryOperator rgbAt
+    ) {
+        if (region == null) {
+            throw new IllegalArgumentException("Region is missing.");
+        }
+
+        if (region.x() + region.width() > imageWidth || region.y() + region.height() > imageHeight) {
             throw new IllegalArgumentException("Region does not fit inside the image.");
         }
 
@@ -50,7 +76,7 @@ public class AverageColor {
 
         for (int y = region.y(); y < region.y() + region.height(); y++) {
             for (int x = region.x(); x < region.x() + region.width(); x++) {
-                Color color = new Color(image.getRGB(x, y));
+                Color color = new Color(rgbAt.applyAsInt(x, y));
                 red += color.getRed();
                 green += color.getGreen();
                 blue += color.getBlue();
@@ -62,18 +88,6 @@ public class AverageColor {
                 channel(green, count),
                 channel(blue, count)
         );
-    }
-
-    public int getRed() {
-        return red;
-    }
-
-    public int getGreen() {
-        return green;
-    }
-
-    public int getBlue() {
-        return blue;
     }
 
     public int getRgb() {

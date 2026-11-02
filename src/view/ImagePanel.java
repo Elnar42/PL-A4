@@ -1,5 +1,6 @@
 package view;
 
+import image.AverageColor;
 import image.ImageRegion;
 import image.RegionListener;
 
@@ -22,12 +23,10 @@ class ImagePanel extends JPanel implements RegionListener {
     }
 
     @Override
-    public void onRegionFinished(ImageRegion region) {
-        if (!isDisplayable()) {
-            return;
-        }
-
+    public void onRegionFinished(ImageRegion region, AverageColor color) {
         UiThread.run(() -> {
+            color.paint(image, region);
+
             if (isDisplayable()) {
                 paintImmediately(0, 0, getWidth(), getHeight());
             }

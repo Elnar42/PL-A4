@@ -26,10 +26,12 @@ public class SingleThreadProcessor extends ThreadProcessor {
                 return;
             }
 
-            AverageColor.apply(image, region);
+            AverageColor color = AverageColor.extract(image, region);
 
             if (listener != null) {
-                listener.onRegionFinished(region);
+                listener.onRegionFinished(region, color);
+            } else {
+                color.paint(image, region);
             }
         }
     }

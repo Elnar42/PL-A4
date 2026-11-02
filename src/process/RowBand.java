@@ -7,6 +7,7 @@ import image.RegionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public final class RowBand {
 
@@ -16,21 +17,40 @@ public final class RowBand {
         this.regions = List.copyOf(regions);
     }
 
-    public List<ImageRegion> regions() {
-        return regions;
-    }
-
-    public void process(BufferedImage image, RegionListener listener) {
+    void process(BufferedImage image, int[] sourcePixels, RegionListener listener, BooleanSupplier stopped) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
 
-        for (ImageRegion region : regions) {
-            AverageColor.apply(image, region);
+        if (sourcePixels == null) {
+            throw new IllegalArgumentException("Pixels are missing.");
+        }
 
-            if (listener != null) {
-                listener.onRegionFinished(region);
+        for (ImageRegion region : regions) {
+            if (stopped.getAsBoolean()) {
+                return;
             }
+
+            AverageColor color = AverageColor.extract(
+                    sourcePixels,
+                    image.getWidth(),
+                    image.getHeight(),
+                    region
+            );
+            finish(image, region, color, listener);
+        }
+    }
+
+    private static void finish(
+            BufferedImage image,
+            ImageRegion region,
+            AverageColor color,
+            RegionListener listener
+    ) {
+        if (listener != null) {
+            listener.onRegionFinished(region, color);
+        } else {
+            color.paint(image, region);
         }
     }
 

@@ -29,3 +29,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Program output ###
+result.jpg
+sources.txt
+.check/
