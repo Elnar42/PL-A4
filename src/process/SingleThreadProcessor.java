@@ -22,6 +22,10 @@ public class SingleThreadProcessor extends ThreadProcessor {
 
         for (ImageRegion region : ImageRegion.forImage(
                 image.getWidth(), image.getHeight(), squareSize)) {
+            if (isStopped()) {
+                return;
+            }
+
             AverageColor.apply(image, region);
 
             if (listener != null) {

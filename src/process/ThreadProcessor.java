@@ -8,12 +8,25 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class ThreadProcessor {
 
     private final String name;
+    private volatile boolean stopped;
 
     protected ThreadProcessor(String name) {
         this.name = name;
     }
 
+    public void stop() {
+        stopped = true;
+    }
+
+    protected boolean isStopped() {
+        return stopped;
+    }
+
     public final void run(BufferedImage image, int squareSize, RegionListener listener) throws InterruptedException {
+        if (stopped) {
+            return;
+        }
+
         AtomicReference<RuntimeException> failure = new AtomicReference<>();
         Thread thread = new Thread(() -> {
             try {

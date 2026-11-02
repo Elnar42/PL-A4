@@ -17,6 +17,7 @@ public class Main {
             String summary = "Mode: " + modeLetter(arguments.mode())
                     + "    Square size: " + arguments.squareSize();
             ImageWindow window = ImageWindow.show(image, summary);
+            window.onClose(SingleThreadProcessor.INSTANCE::stop);
 
             SingleThreadProcessor.INSTANCE.run(image, arguments.squareSize(), window.listener());
             ResultWriter.write(image);

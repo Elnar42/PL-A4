@@ -23,7 +23,15 @@ class ImagePanel extends JPanel implements RegionListener {
 
     @Override
     public void onRegionFinished(ImageRegion region) {
-        UiThread.run(() -> paintImmediately(0, 0, getWidth(), getHeight()));
+        if (!isDisplayable()) {
+            return;
+        }
+
+        UiThread.run(() -> {
+            if (isDisplayable()) {
+                paintImmediately(0, 0, getWidth(), getHeight());
+            }
+        });
     }
 
     @Override

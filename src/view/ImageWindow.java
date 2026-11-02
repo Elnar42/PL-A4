@@ -20,11 +20,13 @@ public class ImageWindow {
     private final ImagePanel panel;
     private final JLabel status;
     private final String summary;
+    private final CloseRequest closeRequest;
 
-    private ImageWindow(ImagePanel panel, JLabel status, String summary) {
+    private ImageWindow(ImagePanel panel, JLabel status, String summary, CloseRequest closeRequest) {
         this.panel = panel;
         this.status = status;
         this.summary = summary;
+        this.closeRequest = closeRequest;
     }
 
     public static ImageWindow show(BufferedImage image, String summary) {
@@ -54,6 +56,10 @@ public class ImageWindow {
         return panel;
     }
 
+    public void onClose(Runnable action) {
+        closeRequest.setAction(action);
+    }
+
     public void saved(String line) {
         UiThread.run(() -> status.setText(summary + "    " + line));
     }
@@ -61,6 +67,8 @@ public class ImageWindow {
     private static ImageWindow open(BufferedImage image, String summary, CountDownLatch painted) {
         JFrame frame = new JFrame("PL-A4");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        CloseRequest closeRequest = new CloseRequest();
+        frame.addWindowListener(closeRequest);
 
         ImagePanel panel = new ImagePanel(image, painted);
         JLabel status = new JLabel(summary);
@@ -81,7 +89,7 @@ public class ImageWindow {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        return new ImageWindow(panel, status, summary);
+        return new ImageWindow(panel, status, summary, closeRequest);
     }
 
     private static Dimension fittedSize(int imageWidth, int imageHeight, int maxWidth, int maxHeight) {
