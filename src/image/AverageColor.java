@@ -18,6 +18,7 @@ public class AverageColor {
         this.green = green;
         this.blue = blue;
     }
+
     public static void apply(BufferedImage image, ImageRegion region) {
         int rgb = extractAverageColour(image, region).getRgb();
 
@@ -62,7 +63,6 @@ public class AverageColor {
                 channel(blue, count)
         );
     }
-
 
     public int getRed() {
         return red;

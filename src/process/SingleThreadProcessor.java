@@ -2,6 +2,7 @@ package process;
 
 import image.AverageColor;
 import image.ImageRegion;
+import image.RegionListener;
 
 import java.awt.image.BufferedImage;
 
@@ -13,7 +14,7 @@ public class SingleThreadProcessor extends ThreadProcessor {
     }
 
     @Override
-    public void process(BufferedImage image, int squareSize) {
+    public void process(BufferedImage image, int squareSize, RegionListener listener) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
@@ -21,6 +22,10 @@ public class SingleThreadProcessor extends ThreadProcessor {
         for (ImageRegion region : ImageRegion.forImage(
                 image.getWidth(), image.getHeight(), squareSize)) {
             AverageColor.apply(image, region);
+
+            if (listener != null) {
+                listener.onRegionFinished(region);
+            }
         }
     }
 }

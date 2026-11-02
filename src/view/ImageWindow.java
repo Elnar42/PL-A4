@@ -1,32 +1,41 @@
 package view;
 
+import image.RegionListener;
+
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ImageWindow {
 
-    public static void show(BufferedImage image) {
+    public static RegionListener show(BufferedImage image) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
 
-        BufferedImage loaded = copy(image);
-        SwingUtilities.invokeLater(() -> open(loaded));
+        CountDownLatch painted = new CountDownLatch(1);
+        AtomicReference<ImagePanel> panel = new AtomicReference<>();
+        UiThread.run(() -> panel.set(open(image, painted)));
+
+        try {
+            painted.await();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Could not show the image.");
+        }
+
+        return panel.get();
     }
 
-    private static void open(BufferedImage image) {
+    private static ImagePanel open(BufferedImage image, CountDownLatch painted) {
         JFrame frame = new JFrame("PL-A4");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        ImagePanel panel = new ImagePanel(image);
+        ImagePanel panel = new ImagePanel(image, painted);
         frame.setContentPane(panel);
         frame.pack();
 
@@ -39,6 +48,7 @@ public class ImageWindow {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        return panel;
     }
 
     private static Dimension fittedSize(int imageWidth, int imageHeight, int maxWidth, int maxHeight) {
@@ -49,30 +59,5 @@ public class ImageWindow {
         int width = Math.max(1, (int) Math.round(imageWidth * scale));
         int height = Math.max(1, (int) Math.round(imageHeight * scale));
         return new Dimension(width, height);
-    }
-
-    private static BufferedImage copy(BufferedImage image) {
-        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = copy.createGraphics();
-        graphics.drawImage(image, 0, 0, null);
-        graphics.dispose();
-        return copy;
-    }
-
-    private static final class ImagePanel extends JPanel {
-
-        private final BufferedImage image;
-
-        private ImagePanel(BufferedImage image) {
-            this.image = image;
-        }
-
-        @Override
-        protected void paintComponent(Graphics graphics) {
-            super.paintComponent(graphics);
-            Graphics2D drawing = (Graphics2D) graphics;
-            drawing.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            drawing.drawImage(image, 0, 0, getWidth(), getHeight(), null);
-        }
     }
 }

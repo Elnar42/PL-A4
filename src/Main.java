@@ -1,6 +1,6 @@
 import cli.Arguments;
-import cli.Mode;
 import image.ImageLoader;
+import image.RegionListener;
 import image.ResultWriter;
 import process.SingleThreadProcessor;
 import view.ImageWindow;
@@ -14,9 +14,9 @@ public class Main {
             Arguments arguments = Arguments.parse(args);
 
             BufferedImage image = ImageLoader.load(arguments.fileName());
-            ImageWindow.show(image);
+            RegionListener listener = ImageWindow.show(image);
 
-            SingleThreadProcessor.INSTANCE.process(image, arguments.squareSize());
+            SingleThreadProcessor.INSTANCE.process(image, arguments.squareSize(), listener);
             ResultWriter.write(image);
 
             System.out.println("Saved " + ResultWriter.FILE_NAME);
