@@ -5,14 +5,21 @@ import image.ImageRegion;
 
 import java.awt.image.BufferedImage;
 
-public class SingleThreadProcessor {
+public class SingleThreadProcessor extends ThreadProcessor {
 
-    public static void process(BufferedImage image, int squareSize) {
+    public static final SingleThreadProcessor INSTANCE = new SingleThreadProcessor();
+
+    private SingleThreadProcessor() {
+    }
+
+    @Override
+    public void process(BufferedImage image, int squareSize) {
         if (image == null) {
             throw new IllegalArgumentException("Image is missing.");
         }
 
-        for (ImageRegion region : ImageRegion.forImage(image.getWidth(), image.getHeight(), squareSize)) {
+        for (ImageRegion region : ImageRegion.forImage(
+                image.getWidth(), image.getHeight(), squareSize)) {
             AverageColor.apply(image, region);
         }
     }
