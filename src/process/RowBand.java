@@ -1,7 +1,10 @@
 package process;
 
+import image.AverageColor;
 import image.ImageRegion;
+import image.RegionListener;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,20 @@ public final class RowBand {
 
     public List<ImageRegion> regions() {
         return regions;
+    }
+
+    public void process(BufferedImage image, RegionListener listener) {
+        if (image == null) {
+            throw new IllegalArgumentException("Image is missing.");
+        }
+
+        for (ImageRegion region : regions) {
+            AverageColor.apply(image, region);
+
+            if (listener != null) {
+                listener.onRegionFinished(region);
+            }
+        }
     }
 
     public static List<RowBand> split(int imageWidth, int imageHeight, int squareSize) {
@@ -44,7 +61,7 @@ public final class RowBand {
     private static List<List<ImageRegion>> rowsOf(List<ImageRegion> regions) {
         List<List<ImageRegion>> rows = new ArrayList<>();
         List<ImageRegion> row = new ArrayList<>();
-        int y = regions.getFirst().y();
+        int y = regions.get(0).y();
 
         for (ImageRegion region : regions) {
             if (region.y() != y) {
