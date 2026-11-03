@@ -8,7 +8,7 @@ It runs on Windows and macOS with any JDK from Java 8 upward, including Java 17 
 
 1. The original picture appears in a window before any square is changed.
 2. A timer under the picture starts at `Time: 00:00` and counts minutes and seconds while squares are painted.
-3. Each square turns into one flat color, left to right and then top to bottom. The window refreshes about thirty times a second, so the squares show up as they finish, and the next square does not wait for that redraw.
+3. Each square turns into one flat color, then that worker pauses for a short time so the square can be seen. Single-thread pauses after every square, one after another. Multi-thread pauses inside each band at the same time, so several rows advance together and the picture finishes sooner.
 4. When painting finishes, the timer stops on the final time. The status line and the console say `Saved` followed by the full path of `result.jpg`.
 5. The same file is written in the working directory. Closing the window early stops further squares and saves the picture as it is at that moment.
 
@@ -119,13 +119,13 @@ flowchart TD
 
 `Main` only opens `cli.Menu`. The menu reads the arguments, loads the image, shows the window, runs the processor, and writes the file.
 
-The picture is shown, and the first paint is waited for, before any square is changed. Processing then runs on a background thread named `image-processor`, so the window can repaint. A finished square is written into a shared pixel buffer, and the worker does not wait for the window. About thirty times a second the Swing thread copies that buffer onto the image and redraws. When the walk finishes, one last copy is drawn before the timer stops.
+The picture is shown, and the first paint is waited for, before any square is changed. Processing then runs on a background thread named `image-processor`, so the window can repaint. A finished square is written into a shared pixel buffer, and the worker then pauses. The pause is normally 40 milliseconds. When one band would otherwise pause for more than six seconds, the pause is shortened. About thirty times a second the Swing thread copies that buffer onto the image and redraws, so the pause is what makes the painting visible. When the walk finishes, one last copy is drawn before the timer stops.
 
 ## Single-thread mode
 
 `S` selects `SingleThreadProcessor`. It copies the pixels once, then walks `ImageRegion.forImage` from left to right, then top to bottom, on one thread. For every square it computes the average and writes that color into the shared buffer. The window copies the buffer onto the image on its own timer.
 
-One square is in progress at a time. The order on screen is the same order as the walk.
+One square is in progress at a time, followed by the pause. The order on screen is the same order as the walk.
 
 ## Multi-thread mode
 
@@ -135,7 +135,7 @@ One square is in progress at a time. The order on screen is the same order as th
 2. `WorkerCount` chooses the number of workers. That number is the number of CPU cores, and it is never larger than the number of square rows. One row of squares uses one worker. A picture with fewer square rows than cores uses one worker per row.
 3. `RowBand.split` groups those rows into contiguous bands. The first `rows % workers` bands receive one extra row, so the bands differ by at most one row.
 4. Each band runs on its own thread, named `image-band-0`, `image-band-1`, and so on. Inside a band the squares still go left to right, then top to bottom.
-5. A finished square is written into the shared pixel buffer. The band threads do not wait for the window, and they never call `setRGB`. Only the Swing thread copies the buffer onto the image.
+5. A finished square is written into the shared pixel buffer, and that band then pauses. The bands pause at the same time, so the wait does not stack the way it does in single-thread mode. The band threads never call `setRGB`. Only the Swing thread copies the buffer onto the image.
 
 `BufferedImage` is not safe for several threads to read while another thread paints. The copied pixels keep the average equal to the single-thread result. A full run of `S` and `M` on the same picture produces the same colors.
 
@@ -179,7 +179,7 @@ The close button does not wait for every square. `CloseRequest` calls `stop` on 
 | `process` | `ThreadProcessor` and the single-thread and multi-thread processors. |
 | `band` | `RowBand`, one horizontal strip of squares. |
 | `worker` | `WorkerCount`, how many band threads to start. |
-| `view` | `ImageWindow` and `ImagePanel`, the picture on screen. |
+| `view` | `ImageWindow`, `ImagePanel`, and `PaintPace`. The pace is the short pause after each square. |
 | `window` | `CloseRequest` and `UiThread`, closing the frame and running updates on the Swing thread. |
 | `log` | `Log`, the only class that writes to the console. |
 | `exceptions` | The program's own errors. They extend `ApplicationException`. |

@@ -252,7 +252,7 @@ public final class Menu {
             Arguments arguments = new Arguments(fileName, squareSize, mode);
             String summary = "Mode: " + arguments.mode().letter()
                     + "    Square size: " + arguments.squareSize();
-            ImageWindow window = ImageWindow.show(image, summary);
+            ImageWindow window = ImageWindow.show(image, summary, arguments.squareSize());
             ThreadProcessor processor = arguments.mode().processor();
             window.onClose(processor::stop);
             window.startTimer();

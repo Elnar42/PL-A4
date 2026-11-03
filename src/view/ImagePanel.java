@@ -17,24 +17,27 @@ class ImagePanel extends JPanel implements RegionListener {
     private final BufferedImage image;
     private final int[] pixels;
     private final CountDownLatch painted;
+    private final PaintPace pace;
     private Timer refresher;
     private boolean shown;
 
     /**
      * Stores the image that the panel draws and a pixel buffer the workers can fill.
      */
-    ImagePanel(BufferedImage image, CountDownLatch painted) {
+    ImagePanel(BufferedImage image, CountDownLatch painted, int squareSize) {
         this.image = image;
         this.painted = painted;
+        pace = PaintPace.forImage(image.getWidth(), image.getHeight(), squareSize);
         pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
     }
 
     /**
-     * Writes a finished square into the shared pixels without waiting for a redraw.
+     * Writes a finished square into the shared pixels, then pauses so that square stays visible.
      */
     @Override
     public void onRegionFinished(ImageRegion region, AverageColor color) {
         fill(region, color.getRgb());
+        pace.pause();
     }
 
     /**

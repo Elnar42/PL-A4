@@ -51,7 +51,7 @@ public class ImageWindow {
     /**
      * Shows the original image and waits until the first paint finishes.
      */
-    public static ImageWindow show(BufferedImage image, String summary) {
+    public static ImageWindow show(BufferedImage image, String summary, int squareSize) {
         if (image == null) {
             throw new MissingImageException();
         }
@@ -62,7 +62,7 @@ public class ImageWindow {
 
         CountDownLatch painted = new CountDownLatch(1);
         AtomicReference<ImageWindow> window = new AtomicReference<>();
-        UiThread.run(() -> window.set(open(image, summary, painted)));
+        UiThread.run(() -> window.set(open(image, summary, squareSize, painted)));
 
         try {
             painted.await();
@@ -146,13 +146,13 @@ public class ImageWindow {
     /**
      * Builds the frame, fits it to the screen, and shows it.
      */
-    private static ImageWindow open(BufferedImage image, String summary, CountDownLatch painted) {
+    private static ImageWindow open(BufferedImage image, String summary, int squareSize, CountDownLatch painted) {
         JFrame frame = new JFrame("PL-A4");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         CloseRequest closeRequest = new CloseRequest();
         frame.addWindowListener(closeRequest);
 
-        ImagePanel panel = new ImagePanel(image, painted);
+        ImagePanel panel = new ImagePanel(image, painted, squareSize);
         JLabel timerLabel = new JLabel(formatElapsed(0));
         timerLabel.setBorder(BorderFactory.createEmptyBorder(4, 8, 0, 8));
         JLabel status = new JLabel(summary);
