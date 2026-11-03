@@ -19,27 +19,18 @@ Install a JDK and make sure `java` and `javac` are on `PATH`. If no Java is inst
 JDK 9 or newer, including 17 and 21, on Windows:
 
 ```text
-javac --release 8 -d out src\Main.java src\Launch.java src\band\*.java src\cli\*.java src\exceptions\*.java src\image\*.java src\log\*.java src\process\*.java src\view\*.java src\window\*.java src\worker\*.java
+javac --release 8 -d out src\Main.java src\band\*.java src\cli\*.java src\exceptions\*.java src\image\*.java src\log\*.java src\process\*.java src\view\*.java src\window\*.java src\worker\*.java
 java -cp out Main image.jpg 20 S
 ```
 
 The same compile on macOS, then a multi-thread run:
 
 ```text
-javac --release 8 -d out src/Main.java src/Launch.java src/band/*.java src/cli/*.java src/exceptions/*.java src/image/*.java src/log/*.java src/process/*.java src/view/*.java src/window/*.java src/worker/*.java
+javac --release 8 -d out src/Main.java src/band/*.java src/cli/*.java src/exceptions/*.java src/image/*.java src/log/*.java src/process/*.java src/view/*.java src/window/*.java src/worker/*.java
 java -cp out Main image.jpg 20 M
 ```
 
 JDK 8 has no `--release` flag. Replace `--release 8` with `-source 8 -target 8`. The `java -cp out Main ...` command stays the same.
-
-`Launch` is an optional starter. It compiles every file under `src` for Java 8 with the JDK that is already installed, then starts `Main` and forwards the same three arguments:
-
-```text
-javac --release 8 -d out src/Launch.java src/log/Log.java
-java -cp out Launch image.jpg 20 S
-```
-
-On JDK 8, compile `Launch` with `-source 8 -target 8`. `Launch` chooses `--release 8` when the running JDK is 9 or newer, and `-source 8 -target 8` on JDK 8.
 
 IntelliJ can run `Main` directly. Give it the three program arguments, for example `img/img.png 20 M`. With no arguments, the console menu opens.
 
@@ -184,7 +175,7 @@ The close button does not wait for every square. `CloseRequest` calls `stop` on 
 | `log` | `Log`, the only class that writes to the console. |
 | `exceptions` | The program's own errors. They extend `ApplicationException`. |
 
-`Main` and `Launch` stay in the default package so the command is `java Main` or `java Launch`.
+`Main` stays in the default package so the command is `java Main`.
 
 ## Errors
 
@@ -208,3 +199,7 @@ The window also uses `MissingImageException`, `MissingSummaryException`, and `Wi
 Both modes were run on a 25 by 17 JPEG with square size 10. That leaves a 5-pixel column on the right and a 7-pixel row on the bottom. Single-thread and multi-thread produced the same pixels, including those partial squares, and both matched the average of each square in the loaded image. The two saved `result.jpg` files matched as well.
 
 The menu was also given a square size of `0`, the mode `Y`, and a missing file. Each of those answers was asked again, and the program stayed open. Typing the name `img.png` from the `img/` list opens `img/img.png`.
+
+## AI policy
+
+AI was not used to develop the program as a whole or generate its core implementation. Instead, it was used as a supporting tool to help understand the task requirements, clarify technical concepts, and discuss potential approaches and ideas before incorporating them into the program. AI was also used to assist in writing and refining the project documentation, improving the clarity, structure, and readability of the explanations.
