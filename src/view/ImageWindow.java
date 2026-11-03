@@ -108,7 +108,15 @@ public class ImageWindow {
             timer = new Timer(1000, event -> timerLabel.setText(formatElapsed(System.currentTimeMillis() - startedAt)));
             timer.setRepeats(true);
             timer.start();
+            panel.startRefreshing();
         });
+    }
+
+    /**
+     * Draws the finished squares once and stops the refresh timer.
+     */
+    public void refresh() {
+        UiThread.run(panel::refresh);
     }
 
     /**
@@ -116,6 +124,7 @@ public class ImageWindow {
      */
     public void stopTimer() {
         UiThread.run(() -> {
+            panel.stopRefreshing();
             if (timer != null) {
                 timer.stop();
             }

@@ -1,8 +1,11 @@
+import log.Log;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Launch {
@@ -20,7 +23,7 @@ public class Launch {
         try {
             runApplication();
         } catch (IOException exception) {
-            System.out.println(exception.getMessage());
+            Log.line(exception.getMessage());
         }
     }
 
@@ -34,10 +37,10 @@ public class Launch {
                 if (code == 0) {
                     return;
                 }
-                System.out.println("The program stopped unexpectedly (exit " + code + ").");
+                Log.line("The program stopped unexpectedly (exit " + code + ").");
             }
 
-            if (quitRequested("Enter Y to try again, or Q to quit: ")) {
+            if (quitRequested()) {
                 return;
             }
         }
@@ -46,9 +49,9 @@ public class Launch {
     /**
      * Returns true when the user chooses Q or the input ends.
      */
-    private static boolean quitRequested(String question) throws IOException {
+    private static boolean quitRequested() throws IOException {
         while (true) {
-            System.out.print(question);
+            Log.prompt("Enter Y to try again, or Q to quit: ");
             String answer = readLine();
             if (answer == null || answer.equalsIgnoreCase("Q")) {
                 return true;
@@ -56,7 +59,7 @@ public class Launch {
             if (answer.equalsIgnoreCase("Y")) {
                 return false;
             }
-            System.out.println("Enter Y to try again, or Q to quit.");
+            Log.line("Enter Y to try again, or Q to quit.");
         }
     }
 
@@ -97,24 +100,24 @@ public class Launch {
             if (new File(new File("out"), "Main.class").isFile()) {
                 return true;
             }
-            System.out.println("A JDK is required. Install any JDK 8 or newer and add its bin folder to PATH.");
+            Log.line("A JDK is required. Install any JDK 8 or newer and add its bin folder to PATH.");
             return false;
         }
 
         List<String> sources = new ArrayList<String>();
         collectSources(new File("src"), sources);
         if (sources.isEmpty()) {
-            System.out.println("No Java sources were found in src. Run Launch from the project directory.");
+            Log.line("No Java sources were found in src. Run Launch from the project directory.");
             return false;
         }
 
         File output = new File("out");
         if (!output.isDirectory() && !output.mkdirs()) {
-            System.out.println("Could not create the out directory.");
+            Log.line("Could not create the out directory.");
             return false;
         }
 
-        List<String> command = new ArrayList<String>();
+        List<String> command = new ArrayList<>();
         command.add(javac.getAbsolutePath());
         if (javaMajor() >= 9) {
             command.add("--release");
@@ -160,7 +163,7 @@ public class Launch {
     private static int startMain() throws IOException {
         File java = tool("java");
         if (java == null) {
-            System.out.println("Could not find java in the running JDK.");
+            Log.line("Could not find java in the running JDK.");
             return 1;
         }
 
@@ -169,9 +172,7 @@ public class Launch {
         command.add("-cp");
         command.add(new File("out").getAbsolutePath());
         command.add("Main");
-        for (int index = 0; index < programArguments.length; index++) {
-            command.add(programArguments[index]);
-        }
+        command.addAll(Arrays.asList(programArguments));
 
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.inheritIO();

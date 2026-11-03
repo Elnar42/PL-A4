@@ -2,6 +2,7 @@ package cli;
 
 import exceptions.InvalidModeException;
 import image.ImageLoader;
+import log.Log;
 import image.ResultWriter;
 import process.ThreadProcessor;
 import view.ImageWindow;
@@ -27,8 +28,8 @@ public final class Menu {
             args = new String[0];
         }
         if (args.length != 3) {
-            System.out.println("Usage: java Main <image> <square size> <S|M>");
-            System.out.println("Example: java Main image.png 20 S");
+            Log.line("Usage: java Main <image> <square size> <S|M>");
+            Log.line("Example: java Main image.png 20 S");
         }
 
         String fileName = args.length > 0 ? args[0].trim() : "";
@@ -42,7 +43,7 @@ public final class Menu {
         Integer squareSize = args.length > 1 ? parsedSquareSize(args[1]) : null;
         if (squareSize == null) {
             if (args.length > 1) {
-                System.out.println("Square size must be a positive whole number.");
+                Log.line("Square size must be a positive whole number.");
             }
             squareSize = readSquareSize();
         }
@@ -52,7 +53,7 @@ public final class Menu {
             try {
                 mode = Mode.parse(args[2]);
             } catch (InvalidModeException exception) {
-                System.out.println(exception.getMessage());
+                Log.line(exception.getMessage());
             }
         }
         if (mode == null) {
@@ -88,28 +89,28 @@ public final class Menu {
     private String readFileName() {
         while (true) {
             List<File> images = imagesInFolder();
-            System.out.println();
-            System.out.println("PL-A4");
-            System.out.println("Each square of the image is replaced by its average color.");
-            System.out.println();
+            Log.blank();
+            Log.line("PL-A4");
+            Log.line("Each square of the image is replaced by its average color.");
+            Log.blank();
 
             if (images.isEmpty()) {
-                System.out.println("img/ is empty.");
+                Log.line("img/ is empty.");
             } else {
-                System.out.println("Images in img/:");
+                Log.line("Images in img/:");
                 for (int index = 0; index < images.size(); index++) {
-                    System.out.println((index + 1) + ". " + images.get(index).getName());
+                    Log.line((index + 1) + ". " + images.get(index).getName());
                 }
             }
 
-            System.out.println();
-            System.out.println("Enter a number or a name from the list, or type the path of your own image.");
+            Log.blank();
+            Log.line("Enter a number or a name from the list, or type the path of your own image.");
             String answer = prompt("Image, or Q to quit: ");
             if (answer.equalsIgnoreCase("Q")) {
                 return null;
             }
             if (answer.isEmpty()) {
-                System.out.println("File name is missing.");
+                Log.line("File name is missing.");
                 continue;
             }
             if (answer.matches("\\d+")) {
@@ -119,10 +120,10 @@ public final class Menu {
                         return images.get(number - 1).getPath();
                     }
                 } catch (NumberFormatException exception) {
-                    System.out.println("Enter a number or a name from the list, or the path of your own image.");
+                    Log.line("Enter a number or a name from the list, or the path of your own image.");
                     continue;
                 }
-                System.out.println("Enter a number or a name from the list, or the path of your own image.");
+                Log.line("Enter a number or a name from the list, or the path of your own image.");
                 continue;
             }
             return imagePath(answer, images);
@@ -139,7 +140,7 @@ public final class Menu {
             }
         }
 
-        File inFolder = new File("img", answer);
+        File inFolder = new File(imageFolder(), answer);
         if (inFolder.isFile()) {
             return inFolder.getPath();
         }
@@ -147,11 +148,47 @@ public final class Menu {
     }
 
     /**
+     * Returns the img folder from the working directory, or from src/img when the program is started from the project root.
+     */
+    private File imageFolder() {
+        File direct = new File("img");
+        File underSource = new File("src", "img");
+        if (containsFile(direct)) {
+            return direct;
+        }
+        if (containsFile(underSource)) {
+            return underSource;
+        }
+        if (direct.isDirectory()) {
+            return direct;
+        }
+        if (underSource.isDirectory()) {
+            return underSource;
+        }
+        return direct;
+    }
+
+    /**
+     * Reports whether the folder exists and contains at least one file.
+     */
+    private boolean containsFile(File folder) {
+        File[] files = folder.listFiles();
+        if (files == null) {
+            return false;
+        }
+        for (File file : files) {
+            if (file.isFile()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns every file currently in img/, sorted by name.
      */
     private List<File> imagesInFolder() {
-        File folder = new File("img");
-        File[] files = folder.listFiles();
+        File[] files = imageFolder().listFiles();
         List<File> images = new ArrayList<>();
         if (files == null) {
             return images;
@@ -181,7 +218,7 @@ public final class Menu {
             } catch (NumberFormatException exception) {
                 // The message below asks for the size again.
             }
-            System.out.println("Square size must be a positive whole number.");
+            Log.line("Square size must be a positive whole number.");
         }
     }
 
@@ -194,7 +231,7 @@ public final class Menu {
             try {
                 return Mode.parse(answer);
             } catch (InvalidModeException exception) {
-                System.out.println(exception.getMessage());
+                Log.line(exception.getMessage());
             }
         }
     }
@@ -207,7 +244,7 @@ public final class Menu {
         try {
             image = ImageLoader.load(fileName);
         } catch (RuntimeException exception) {
-            System.out.println(exception.getMessage());
+            Log.line(exception.getMessage());
             return false;
         }
 
@@ -221,16 +258,17 @@ public final class Menu {
             window.startTimer();
             try {
                 processor.run(image, arguments.squareSize(), window.listener());
+                window.refresh();
             } finally {
                 window.stopTimer();
             }
-            ResultWriter.write(image);
-            window.saved("Saved " + ResultWriter.FILE_NAME);
-            System.out.println("Saved " + ResultWriter.FILE_NAME);
+            String saved = "Saved " + ResultWriter.write(image);
+            window.saved(saved);
+            Log.line(saved);
             return true;
         } catch (Exception exception) {
             String message = exception.getMessage();
-            System.out.println(message == null ? "Could not process the image." : message);
+            Log.line(message == null ? "Could not process the image." : message);
             return true;
         }
     }
@@ -239,8 +277,7 @@ public final class Menu {
      * Prints a question and reads one trimmed answer.
      */
     private String prompt(String question) {
-        System.out.print(question);
-        System.out.flush();
+        Log.prompt(question);
         try {
             String line = input.readLine();
             if (line == null) {
@@ -248,7 +285,7 @@ public final class Menu {
             }
             return line.trim();
         } catch (IOException exception) {
-            System.out.println("Could not read the answer.");
+            Log.line("Could not read the answer.");
             return "";
         }
     }

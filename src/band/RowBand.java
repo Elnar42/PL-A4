@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+
 /**
  * This band represents the row of the image that each processor takes in multithreading
  */

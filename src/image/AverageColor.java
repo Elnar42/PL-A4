@@ -124,12 +124,12 @@ public final class AverageColor {
         long blueSum = 0;
         long count = (long) region.width() * region.height();
 
-        for (int y = region.y(); y < region.y() + region.height(); y++) {
+            for (int y = region.y(); y < region.y() + region.height(); y++) {
             for (int x = region.x(); x < region.x() + region.width(); x++) {
-                Color color = new Color(rgbAt.applyAsInt(x, y));
-                redSum += color.getRed();
-                greenSum += color.getGreen();
-                blueSum += color.getBlue();
+                int pixel = rgbAt.applyAsInt(x, y);
+                redSum += (pixel >> 16) & 0xff;
+                greenSum += (pixel >> 8) & 0xff;
+                blueSum += pixel & 0xff;
             }
         }
 

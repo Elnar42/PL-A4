@@ -14,20 +14,22 @@ public class ResultWriter {
     public static final String FILE_NAME = "result.jpg";
 
     /**
-     * Writes the image to result.jpg in the working directory.
+     * Writes the image to result.jpg and returns the full path of that file.
      */
-    public static void write(BufferedImage image) {
+    public static String write(BufferedImage image) {
         if (image == null) {
             throw new MissingImageException();
         }
 
+        File file = new File(FILE_NAME).getAbsoluteFile();
         try {
-            if (!ImageIO.write(asJpeg(image), "jpg", new File(FILE_NAME))) {
-                throw new ImageWriteException(FILE_NAME);
+            if (!ImageIO.write(asJpeg(image), "jpg", file)) {
+                throw new ImageWriteException(file.getAbsolutePath());
             }
         } catch (IOException exception) {
-            throw new ImageWriteException(FILE_NAME);
+            throw new ImageWriteException(file.getAbsolutePath());
         }
+        return file.getAbsolutePath();
     }
 
     /**

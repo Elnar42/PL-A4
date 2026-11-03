@@ -27,13 +27,16 @@ public class SingleThreadProcessor extends ThreadProcessor {
             throw new MissingImageException();
         }
 
-        for (ImageRegion region : ImageRegion.forImage(
-                image.getWidth(), image.getHeight(), squareSize)) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int[] sourcePixels = image.getRGB(0, 0, width, height, null, 0, width);
+
+        for (ImageRegion region : ImageRegion.forImage(width, height, squareSize)) {
             if (isStopped()) {
                 return;
             }
 
-            AverageColor color = AverageColor.extract(image, region);
+            AverageColor color = AverageColor.extract(sourcePixels, width, height, region);
 
             if (listener != null) {
                 listener.onRegionFinished(region, color);
